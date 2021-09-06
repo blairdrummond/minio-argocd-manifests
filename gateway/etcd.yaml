@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: etcd
+  namespace: minio-system
+spec:
+  project: default
+  destination:
+    namespace: minio-system
+    server: https://kubernetes.default.svc
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: etcd
+    targetRevision: 6.2.9
+    helm:
+      values: |
+        nameOverride: "etcd-minio-gateway"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

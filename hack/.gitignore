@@ -1,0 +1,5 @@
+*.json
+.terraform
+*.swp
+*.lock.hcl
+

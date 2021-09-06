@@ -1,0 +1,43 @@
+ui:
+  enabled: true
+
+server:
+  standalone:
+    config: |
+      plugin_directory = "/plugins"
+      ui = true
+      listener "tcp" {
+        tls_disable = 1
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+      }
+      storage "file" {
+        path = "/vault/data"
+      }
+
+  extraInitContainers:
+  # This example installs a plugin pulled from github into the /usr/local/libexec/vault/oauthapp folder,
+  # which is defined in the volumes value.
+  - name: vault-plugin-secrets-minio
+    # Like the regular images, but git is pre-installed
+    image: bitnami/golang:1.16
+    command: [sh, -c]
+    args:
+      - git clone https://github.com/StatCan/vault-plugin-secrets-minio.git &&
+        cd vault-plugin-secrets-minio &&
+        GOCACHE=/tmp make &&
+        mv vault-plugin-secrets-minio /usr/local/libexec/vault/vault-plugin-secrets-minio
+    volumeMounts:
+      - name: plugins
+        mountPath: /usr/local/libexec/vault
+
+  # The purpose is to make it easy to share volumes between containers.
+  volumes:
+  - name: plugins
+    emptyDir: {}
+
+  # volumeMounts is a list of volumeMounts for the main server container. These are rendered
+  volumeMounts:
+  - mountPath: /plugins
+    name: plugins
+    readOnly: true
