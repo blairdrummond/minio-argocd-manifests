@@ -33,11 +33,11 @@ spec:
               storageAccountKeyExistingSecretKey: "storageAccountKey"
         extraEnv:
           - name: MINIO_ETCD_ENDPOINTS
-            value: http://etcd-minio-gateway-headless:2379
-        #image:
-        #  registry: k8scc01covidacr.azurecr.io
-        #  repository: minio/minio
-        #  tag: 6379f1af
+            value: http://etcd-minio-gateway-headless:2379/
+        image:
+          registry: docker.io
+          repository: bitnami/minio
+          tag: 2021.5.27-debian-10-r8
         ingress:
           enabled: false
           hostname: minio.local

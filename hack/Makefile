@@ -45,6 +45,26 @@ vault-minio:
 	vault plugin register -sha256=$$(kubectl exec -n vault-system vault-0 sha256sum /plugins/vault-plugin-secrets-minio | awk '{print $$1}') \
 		secret vault-plugin-secrets-minio
 
+profile-blair-drummond:
+	export VAULT_ADDR=http://localhost:8200; \
+	CREDS_FILE=$$(find . -name 'vault-cluster-vault*.json'); \
+	echo "$$CREDS_FILE"; \
+	vault login token=$$(jq -r '.root_token' "$$CREDS_FILE"); \
+	vault write minio_gateway/config \
+		endpoint=minio-gateway.minio-system:9000 \
+		accessKeyId=$$(kubectl get secrets -n minio-system minio-gateway -o json | jq -r '.data["access-key"] | @base64d') \
+		secretAccessKey=$$(kubectl get secrets -n minio-system minio-gateway -o json | jq -r '.data["secret-key"] | @base64d') \
+		useSSL=false
+
+	export VAULT_ADDR=http://localhost:8200; \
+	CREDS_FILE=$$(find . -name 'vault-cluster-vault*.json'); \
+	echo "$$CREDS_FILE"; \
+	vault login token=$$(jq -r '.root_token' "$$CREDS_FILE"); \
+	vault write minio_gateway/roles/profile-blair-drummond \
+		policy=readwrite
+		user_name_prefix=profile-blair-drummond-
+
+
 configure-vault-kubernetes:
 	CREDS_FILE=$$(find . -name 'vault-cluster-vault*.json'); \
 	echo "$$CREDS_FILE"; \

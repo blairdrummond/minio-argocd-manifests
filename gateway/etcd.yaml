@@ -15,6 +15,16 @@ spec:
     helm:
       values: |
         nameOverride: "minio-gateway"
+        auth:
+          rbac:
+            enabled: false
+        #image:
+        #  registry: docker.io
+        #  repository: bitnami/etcd
+        #  tag: 3.3.9-debian-9-r73
+        replicaCount: 3
+        #persistence:
+        #  enabled: false
   syncPolicy:
     automated:
       prune: true
