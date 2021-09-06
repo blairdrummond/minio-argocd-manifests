@@ -38,14 +38,12 @@ vault: helm
 	helm install -n vault-system -f vault-values.yaml vault hashicorp/vault
 
 vault-minio:
+	export VAULT_ADDR=http://localhost:8200; \
 	CREDS_FILE=$$(find . -name 'vault-cluster-vault*.json'); \
 	echo "$$CREDS_FILE"; \
 	vault login token=$$(jq -r '.root_token' "$$CREDS_FILE"); \
-	vault secrets enable \
-		-path=minio \
-		-plugin-name=vault-plugin-secrets-minio \
-		-description="Instance of the Minio plugin" \
-		plugin
+	vault plugin register -sha256=$$(kubectl exec -n vault-system vault-0 sha256sum /plugins/vault-plugin-secrets-minio | awk '{print $$1}') \
+		secret vault-plugin-secrets-minio
 
 configure-vault-kubernetes:
 	CREDS_FILE=$$(find . -name 'vault-cluster-vault*.json'); \

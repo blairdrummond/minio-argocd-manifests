@@ -20,16 +20,21 @@ server:
   # which is defined in the volumes value.
   - name: vault-plugin-secrets-minio
     # Like the regular images, but git is pre-installed
-    image: bitnami/golang:1.16
+    image: golang:1.16-alpine
     command: [sh, -c]
     args:
-      - git clone https://github.com/StatCan/vault-plugin-secrets-minio.git &&
+      - apk add git make &&
+        git clone https://github.com/StatCan/vault-plugin-secrets-minio.git &&
         cd vault-plugin-secrets-minio &&
-        GOCACHE=/tmp make &&
+        make &&
         mv vault-plugin-secrets-minio /usr/local/libexec/vault/vault-plugin-secrets-minio
     volumeMounts:
       - name: plugins
         mountPath: /usr/local/libexec/vault
+    securityContext:
+      runAsNonRoot: false
+      runAsUser: 0
+      runAsGroup: 0
 
   # The purpose is to make it easy to share volumes between containers.
   volumes:

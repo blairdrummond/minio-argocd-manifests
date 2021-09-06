@@ -5,4 +5,4 @@ argocd_namespace = "argocd"
 kubernetes_namespace = "minio-system"
 
 # This should obviously be a secret
-vault_token = "s.Cx6qyijqXk31YXrDmUhPzVqK"
+vault_token = "s.Ucof4g5PR5vBO47nlG9uSMYO"

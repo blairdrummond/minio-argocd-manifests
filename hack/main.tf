@@ -59,7 +59,7 @@ resource "kubectl_manifest" "gateway_application" {
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: minio-gateway
+  name: minio-gateway-root
   namespace: ${var.argocd_namespace}
 spec:
   project: default
@@ -80,42 +80,40 @@ YAML
 }
 
 
-#resource "vault_mount" "minio_gateway" {
-#  path = "minio_gateway"
-#  type = "minio"
-#}
-
-
-# resource "time_sleep" "wait_30_seconds" {
-#   depends_on = [kubectl_manifest.gateway_application]
-#   create_duration = "45s"
-# }
+resource "time_sleep" "wait_30_seconds" {
+  depends_on = [kubectl_manifest.gateway_application]
+  create_duration = "45s"
+}
 
 
 # We wait 45s after the creation of the gateway
 # for everything to boot and for a new secret to
 # be created. We wait for the sleep to finish
 # before sourcing the secert.
-# data "kubernetes_secret" "minio_secret" {
-#   metadata {
-#     name      = "minio-gateway-tf"
-#     namespace = var.kubernetes_namespace
-#   }
-#   depends_on = [
-#     time_sleep.wait_30_seconds
-#   ]
-# }
+data "kubernetes_secret" "minio_secret" {
+  metadata {
+    name      = "minio-gateway"
+    namespace = var.kubernetes_namespace
+  }
+  depends_on = [
+    time_sleep.wait_30_seconds
+  ]
+}
 
+resource "vault_mount" "minio_gateway" {
+  path = "minio_gateway"
+  type = "vault-plugin-secrets-minio"
+}
 
-# resource "vault_generic_secret" "minio_standard_config" {
-#   path = "${vault_mount.minio_standard.path}/config"
-#
-#   data_json = <<EOT
-# {
-#   "endpoint": "minio.${var.kubernetes_namespace}:443",
-#   "accessKeyId": "${var.minio_standard_access}",
-#   "secretAccessKey": "${var.minio_standard_secret}",
-#   "useSSL": false
-# }
-# EOT
-# }
+resource "vault_generic_secret" "minio_standard_config" {
+  path = "${vault_mount.minio_gateway.path}/config"
+
+  data_json = <<EOT
+{
+  "endpoint": "minio-gateway.${var.kubernetes_namespace}:9000",
+  "accessKeyId": "${data.kubernetes_secret.minio_secret.data["access-key"]}",
+  "secretAccessKey": "${data.kubernetes_secret.minio_secret.data["secret-key"]}",
+  "useSSL": false
+}
+EOT
+}
