@@ -23,8 +23,8 @@ spec:
         #  repository: bitnami/etcd
         #  tag: 3.3.9-debian-9-r73
         replicaCount: 3
-        #persistence:
-        #  enabled: false
+        persistence:
+          enabled: false
   syncPolicy:
     automated:
       prune: true
