@@ -6,6 +6,8 @@ resources:
 - gateway/etcd.yaml
 - gateway/opa-minio.yaml
 
+- credential-injector/manifest.yaml
+
 #- controllers/minio-credential-injector.yaml
 #- controllers/profile-controller-minio.yaml
 #- boathouse/manifest.yaml
@@ -19,6 +21,10 @@ configMapGenerator:
 - name: minio-opa
   files:
     - gateway/policy.rego
+# MinIO names and service urls
+- name: minio-instances-json
+  files:
+    - credential-injector/instances.json
 
 # Create this in the terraform instead
 secretGenerator:
@@ -44,3 +50,7 @@ images:
 - name: statcan/boathouse
   newName: k8scc01covidacr.azurecr.io/boathouse
   newTag: latest
+
+- name: statcan/minio-credential-injector
+  newName: k8scc01covidacr.azurecr.io/minio-credential-injector
+  newTag: 16351d29199f83f97bae991ee9b0e35c5832b5e3

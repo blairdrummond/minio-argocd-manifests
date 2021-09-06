@@ -61,7 +61,7 @@ spec:
         - name: k8scc01covidacr-registry-connection
       containers:
       - name: minio-credential-injector
-        image: k8scc01covidacr.azurecr.io/minio-credential-injector:7b8709e2899fe83faf7d38f7d3504fdf20233163
+        image: statcan/minio-credential-injector:latest
         resources:
           limits:
             memory: "128Mi"
@@ -73,10 +73,16 @@ spec:
         - name: certs
           mountPath: /certs
           readOnly: true
+        - name: instances
+          mountPath: /instances.json
+          subPath: instances.json
       volumes:
       - name: certs
         secret:
           secretName: minio-credential-injector-tls
+      - name: instances
+        configMap:
+          name: minio-instances-json
 ---
 apiVersion: v1
 kind: Service

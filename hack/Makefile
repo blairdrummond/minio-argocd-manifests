@@ -104,3 +104,9 @@ configure-vault-kubernetes:
 
 vault-port-forward:
 	kubectl port-forward -n vault-system svc/vault-ui 8200:8200
+
+NAMESPACES := daaas-system vault-system minio-system
+namespaces: $(NAMESPACES)
+$(NAMESPACES):
+	kubectl create namespace $@ || true
+	kubectl label  namespace $@ istio-injection=enabled --overwrite || true
