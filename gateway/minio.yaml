@@ -23,6 +23,8 @@ spec:
             enabled: true
             minReplicas: "4"
             maxReplicas: "8"
+            targetCPU: "60"
+            targetMemory: "60"
           auth:
             azure:
               storageAccountNameExistingSecret: "azure-blob-storage"
