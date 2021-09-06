@@ -24,6 +24,8 @@ resource "azurerm_storage_account" "gateway" {
     versioning_enabled       = "true"
     change_feed_enabled      = "true"
   }
+
+  depends_on = [azurerm_resource_group.rg]
 }
 
 
@@ -47,37 +49,41 @@ resource "kubernetes_secret" "blob_storage" {
     storageAccountName = azurerm_storage_account.gateway.name
     storageAccountKey = azurerm_storage_account.gateway.secondary_access_key
   }
+
+  depends_on = [kubernetes_namespace.minio_namespace]
 }
 
 
-# resource "kubectl_manifest" "gateway_application" {
-#   yaml_body = <<YAML
-# apiVersion: argoproj.io/v1alpha1
-# kind: Application
-# metadata:
-#   name: minio-gateway
-#   namespace: ${var.argocd_namespace}
-# spec:
-#   project: default
-#   destination:
-#     namespace: ${var.kubernetes_namespace}
-#     server: https://kubernetes.default.svc
-#   source:
-#     repoURL: https://github.com/blairdrummond/minio-argocd-manifests.git
-#     targetRevision: ${var.helm_chart_version}
-#     path: .
-#   syncPolicy:
-#     automated:
-#       prune: true
-#       selfHeal: true
-# YAML
-# }
+resource "kubectl_manifest" "gateway_application" {
+  yaml_body = <<YAML
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: minio-gateway
+  namespace: ${var.argocd_namespace}
+spec:
+  project: default
+  destination:
+    namespace: ${var.kubernetes_namespace}
+    server: https://kubernetes.default.svc
+  source:
+    repoURL: https://github.com/blairdrummond/minio-argocd-manifests.git
+    targetRevision: main
+    path: .
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+YAML
 
-
-resource "vault_mount" "minio_gateway" {
-  path = "minio_gateway"
-  type = "minio"
+  depends_on = [kubernetes_namespace.minio_namespace]
 }
+
+
+#resource "vault_mount" "minio_gateway" {
+#  path = "minio_gateway"
+#  type = "minio"
+#}
 
 
 # resource "time_sleep" "wait_30_seconds" {
@@ -86,21 +92,21 @@ resource "vault_mount" "minio_gateway" {
 # }
 
 
-# # We wait 45s after the creation of the gateway
-# # for everything to boot and for a new secret to
-# # be created. We wait for the sleep to finish
-# # before sourcing the secert.
+# We wait 45s after the creation of the gateway
+# for everything to boot and for a new secret to
+# be created. We wait for the sleep to finish
+# before sourcing the secert.
 # data "kubernetes_secret" "minio_secret" {
 #   metadata {
-#     name      = var.name
-#     namespace = var.namespace
+#     name      = "minio-gateway-tf"
+#     namespace = var.kubernetes_namespace
 #   }
 #   depends_on = [
 #     time_sleep.wait_30_seconds
 #   ]
 # }
-#
-#
+
+
 # resource "vault_generic_secret" "minio_standard_config" {
 #   path = "${vault_mount.minio_standard.path}/config"
 #

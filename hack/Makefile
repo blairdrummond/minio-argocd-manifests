@@ -1,5 +1,30 @@
 VAULT_SERVICE_ACCOUNT_NAME := vault-sa
 
+
+# Handy
+OKBLUE := '\033[94m'
+OKCYAN := '\033[96m'
+OKGREEN := '\033[92m'
+WARNING := '\033[93m'
+FAIL := '\033[91m'
+ENDC := '\033[0m'
+BOLD := '\033[1m'
+
+
+
+argo-get-pass:
+	@printf $(OKGREEN)
+	@printf $(BOLD)
+	@echo "ArgoCD Login"
+	@echo "=========================="
+	@echo "ArgoCD Username is: admin"
+	@printf "ArgoCD Password is: %s\n" $$(kubectl -n argocd \
+		get secret argocd-initial-admin-secret \
+		-o jsonpath="{.data.password}" | base64 -d)
+	@echo "=========================="
+	@printf $(ENDC)
+
+
 profile-crd:
 	kubectl apply -f kubeflow.org_profiles.yaml
 
