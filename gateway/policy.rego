@@ -1,6 +1,9 @@
 package httpapi.authz
 import input
 
+# For environment variables
+runtime := opa.runtime()
+
 default allow = false
 
 rl_permissions := {
@@ -20,13 +23,6 @@ rl_permissions := {
                 {"action": "s3:ListBucket" }],
 }
 
-# Needed by Vault to create profiles
-allow {
-  root = [
-        "t6sGKqV2oM"
-  ]
-  input.account == root[_]
-}
 
 ##
 ## PRIVATE BUCKETS
@@ -63,4 +59,13 @@ allow {
   permissions := rl_permissions["shared"]
   p := permissions[_]
   p == {"action": input.action}
+}
+
+##
+## ADMIN
+##
+
+# Needed by Vault to create profiles
+allow {
+  input.account == runtime.env.MINIO_ADMIN
 }
