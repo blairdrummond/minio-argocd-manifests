@@ -20,6 +20,14 @@ rl_permissions := {
                 {"action": "s3:ListBucket" }],
 }
 
+# Needed by Vault to create profiles
+allow {
+  root = [
+        "t6sGKqV2oM"
+  ]
+  input.account == root[_]
+}
+
 ##
 ## PRIVATE BUCKETS
 ##
