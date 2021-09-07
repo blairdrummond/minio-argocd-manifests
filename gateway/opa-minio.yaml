@@ -42,12 +42,12 @@ spec:
             - '--ignore=.*'
             - '--server'
             - /policies
-           env:
-           - name: MINIO_ADMIN
-             valueFrom:
-               secretKeyRef:
-                 name: minio-gateway
-                 key: access-key
+          env:
+          - name: MINIO_ADMIN
+            valueFrom:
+              secretKeyRef:
+                name: minio-gateway
+                key: access-key
           ports:
             - name: http
               containerPort: 8181
