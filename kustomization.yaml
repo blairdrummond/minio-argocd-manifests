@@ -21,8 +21,10 @@ configMapGenerator:
 - name: minio-opa
   files:
     - gateway/policy.rego
+
 # MinIO names and service urls
 - name: minio-instances-json
+  namespace: daaas-system
   files:
     - credential-injector/instances.json
 
