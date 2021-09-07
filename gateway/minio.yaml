@@ -34,6 +34,8 @@ spec:
         extraEnv:
           - name: MINIO_ETCD_ENDPOINTS
             value: http://etcd-minio-gateway-headless:2379/
+          - name: MINIO_IAM_OPA_URL
+            value: http://minio-opa:8181/v1/data/httpapi/authz
         image:
           registry: docker.io
           repository: bitnami/minio
