@@ -61,8 +61,21 @@ profile-blair-drummond:
 	echo "$$CREDS_FILE"; \
 	vault login token=$$(jq -r '.root_token' "$$CREDS_FILE"); \
 	vault write minio_gateway/roles/profile-blair-drummond \
-		policy=readwrite
-		user_name_prefix=profile-blair-drummond-
+		policy=readwrite \
+		user_name_prefix='profile-blair-drummond-'
+
+	export VAULT_ADDR=http://localhost:8200; \
+	CREDS_FILE=$$(find . -name 'vault-cluster-vault*.json'); \
+	echo "$$CREDS_FILE"; \
+	vault login token=$$(jq -r '.root_token' "$$CREDS_FILE"); \
+	vault write auth/kubernetes/role/profile-blair-drummond \
+		bound_service_account_names=default-editor \
+		bound_service_account_namespaces=blair-drummond \
+		policies=blair-drummond \
+		ttl=1h
+
+	export VAULT_ADDR=http://localhost:8200; \
+	vault policy write blair-drummond k8s-policy.hcl
 
 
 configure-vault-kubernetes:
