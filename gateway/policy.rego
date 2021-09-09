@@ -11,18 +11,28 @@ rl_permissions := {
               {"action": "s3:GetObject"},
               {"action": "s3:ListAllMyBuckets"}],
     "user": [{"action": "s3:CreateBucket"},
-              {"action": "s3:DeleteBucket"},
-              {"action": "s3:DeleteObject"},
-              {"action": "s3:GetObject"},
-              {"action": "s3:ListAllMyBuckets"},
-              {"action": "s3:GetBucketObjectLockConfiguration"},
-              {"action": "s3:ListBucket"},
-              {"action": "s3:PutObject"}],
+             {"action": "s3:DeleteBucket"},
+             {"action": "s3:DeleteObject"},
+             {"action": "s3:GetObject"},
+             {"action": "s3:ListAllMyBuckets"},
+             {"action": "s3:GetBucketObjectLockConfiguration"},
+             {"action": "s3:ListBucket"},
+             {"action": "s3:PutObject"}],
     "shared": [{"action": "s3:ListAllMyBuckets"},
-                {"action": "s3:GetObject"},
-                {"action": "s3:ListBucket" }],
+               {"action": "s3:GetObject"},
+               {"action": "s3:ListBucket" }],
+    "vault": [{"action": "s3:ListAllMyBuckets"},
+              {"action": "s3:CreateBucket"},
+              {"action": "s3:DeleteBucket"},
+              {"action": "admin:CreatePolicy"},
+              {"action": "admin:DeletePolicy"},
+              {"action": "admin:GetPolicy"},
+              {"action": "admin:AttachUserOrGroupPolicy"},
+              {"action": "admin:ListUserPolicies"},
+              {"action": "admin:EnableUser"},
+              {"action": "admin:DisableUser"},
+              {"action": "admin:GetUser"}],
 }
-
 
 ##
 ## PRIVATE BUCKETS
@@ -68,4 +78,7 @@ allow {
 # Needed by Vault to create profiles
 allow {
   input.account == runtime.env.MINIO_ADMIN
+  permissions := rl_permissions["vault"]
+  p := permissions[_]
+  p == {"action": input.action}
 }

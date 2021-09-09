@@ -54,6 +54,28 @@ resource "kubernetes_secret" "blob_storage" {
 }
 
 
+resource "random_password" "minio_access_key" {
+  length           = 24
+  special          = false
+}
+
+resource "random_password" "minio_secret_key" {
+  length           = 36
+  special          = false
+}
+
+resource "kubernetes_secret" "minio_secret" {
+  metadata {
+    name      = "minio-gateway-secret"
+    namespace = var.kubernetes_namespace
+  }
+
+  data = {
+    access-key = random_password.minio_access_key.result
+    secret-key = random_password.minio_secret_key.result
+  }
+}
+
 resource "kubectl_manifest" "gateway_application" {
   yaml_body = <<YAML
 apiVersion: argoproj.io/v1alpha1
@@ -80,25 +102,25 @@ YAML
 }
 
 
-resource "time_sleep" "wait_30_seconds" {
-  depends_on = [kubectl_manifest.gateway_application]
-  create_duration = "45s"
-}
-
-
-# We wait 45s after the creation of the gateway
-# for everything to boot and for a new secret to
-# be created. We wait for the sleep to finish
-# before sourcing the secert.
-data "kubernetes_secret" "minio_secret" {
-  metadata {
-    name      = "minio-gateway"
-    namespace = var.kubernetes_namespace
-  }
-  depends_on = [
-    time_sleep.wait_30_seconds
-  ]
-}
+# resource "time_sleep" "wait_30_seconds" {
+#   depends_on = [kubectl_manifest.gateway_application]
+#   create_duration = "45s"
+# }
+#
+#
+# # We wait 45s after the creation of the gateway
+# # for everything to boot and for a new secret to
+# # be created. We wait for the sleep to finish
+# # before sourcing the secert.
+# data "kubernetes_secret" "minio_secret" {
+#   metadata {
+#     name      = "minio-gateway"
+#     namespace = var.kubernetes_namespace
+#   }
+#   depends_on = [
+#     time_sleep.wait_30_seconds
+#   ]
+# }
 
 resource "vault_mount" "minio_gateway" {
   path = "minio_gateway"
@@ -111,8 +133,8 @@ resource "vault_generic_secret" "minio_standard_config" {
   data_json = <<EOT
 {
   "endpoint": "minio-gateway.${var.kubernetes_namespace}:9000",
-  "accessKeyId": "${data.kubernetes_secret.minio_secret.data["access-key"]}",
-  "secretAccessKey": "${data.kubernetes_secret.minio_secret.data["secret-key"]}",
+  "accessKeyId": "${kubernetes_secret.minio_secret.data["access-key"]}",
+  "secretAccessKey": "${kubernetes_secret.minio_secret.data["secret-key"]}",
   "useSSL": false
 }
 EOT

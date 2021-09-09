@@ -16,6 +16,9 @@ spec:
       values: |
         ## MinIO(R) Gateway configuration
         nameOverride: "minio-gateway"
+        global:
+          minio:
+            existingSecret: minio-gateway-secret
         gateway:
           enabled: true
           type: azure
