@@ -42,8 +42,6 @@ spec:
             - '--ignore=.*'
             - '--server'
             - /policies
-            - '--log-level'
-            - debug
           env:
           - name: MINIO_ADMIN
             valueFrom:
