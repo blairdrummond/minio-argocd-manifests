@@ -46,7 +46,7 @@ spec:
           - name: MINIO_ADMIN
             valueFrom:
               secretKeyRef:
-                name: minio-gateway
+                name: minio-gateway-secret
                 key: access-key
           ports:
             - name: http
