@@ -22,6 +22,7 @@ rl_permissions := {
                {"action": "s3:GetObject"},
                {"action": "s3:ListBucket" }],
     "vault": [{"action": "s3:ListAllMyBuckets"},
+              {"action": "s3:ListBucket"},
               {"action": "s3:CreateBucket"},
               {"action": "s3:DeleteBucket"},
               {"action": "admin:CreatePolicy"},
